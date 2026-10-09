@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from rag import ask
+from db import log_query, recent_queries
 
 app = FastAPI(title="RAG Chatbot API")
 
@@ -24,6 +25,13 @@ def ask_question(body: Question):
     if not q:
         raise HTTPException(status_code=400, detail="Question must not be empty")
     try:
-        return Answer(answer=ask(q))
+        answer = ask(q)
     except Exception:
         raise HTTPException(status_code=502, detail="LLM request failed")
+    log_query(q, answer)
+    return Answer(answer=answer)
+
+
+@app.get("/history")
+def history(limit: int = 10):
+    return recent_queries(limit)
