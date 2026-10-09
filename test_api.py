@@ -17,6 +17,7 @@ def test_empty_question_rejected():
 
 def test_ask_returns_answer(monkeypatch):
     monkeypatch.setattr("api.ask", lambda q: "stub answer")
+    monkeypatch.setattr("api.log_query", lambda q, a: None)
     r = client.post("/ask", json={"question": "What is SPF?"})
     assert r.status_code == 200
     assert r.json()["answer"] == "stub answer"
